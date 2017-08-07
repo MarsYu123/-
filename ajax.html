@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=UqaUsYhjQLYhftebMS3FdGoyPajTfzIq"></script>
+        <style>
+            #msg{
+                width: 70%;
+                margin: auto;
+                text-align: center;
+            }
+            #msg li{
+                list-style: none;
+            }
+            .inp{
+                margin: auto;
+                text-align: center;
+            }
+        </style>
+
+    </head>
+    <body>
+    <div id="allmap"></div>
+        <div id="msg"></div>
+        <div class="inp">
+            <input type="text" placeholder="请输入城市名称" id="inp">
+            <button id="run">确定</button>
+        </div>
+        
+    <script>
+        $(function () {
+            var ctn;
+            var cityname,
+                i=0;
+            var map = new BMap.Map("allmap");
+            map.centerAndZoom();
+            var myCity = new BMap.LocalCity();
+            myCity.get(function (result) {
+                ctn = result.name;
+                select();
+            });
+            $("#run").bind("click",function () {
+                cityname=$("#inp").val();
+                i = 1;
+                select()
+            });
+            $("#inp").bind({keypress:function () {
+                i+=1 ;
+            },keydown:function (e) {
+                if (e.which==13){
+                    cityname=$("#inp").val();
+                    select();
+                }
+            }
+            });
+            function select() {
+                if (i==0){
+                    url='https://free-api.heweather.com/v5/now?city='+ctn+'&key=452970d722e14415bd7ac7eb391b0e11';
+                }else{
+                    url='https://free-api.heweather.com/v5/now?city='+cityname+'&key=452970d722e14415bd7ac7eb391b0e11';
+                }
+                $.ajax(
+                    {
+                        url:url,
+                        type:'get',
+                        datatype:'jsonp',
+                        success:function (data) {
+                            var jsdata=eval(data);
+                            var msg=jsdata.HeWeather5[0];
+                            switch (true) {
+                                case msg.status=="unknown city":
+                                    $("#msg").html("没有此城市，请检查输入是否正确");
+                                    break;
+                                case $("#inp").val()==""&&i==1:
+                                    $("#msg").html("请输入城市名称");
+                                    break;
+                                default:
+                            }
+                            if (msg.status=="unknown city"){
+                                if ($("#inp").val()==""){
+                                    $("#msg").html("请输入城市名称");
+                                    return;
+                                }else{
+                                    $("#msg").html("没有找到此城市，请输入正确名称");
+                                    return;
+                                }
+                            }else{
+                                $("#msg").html("<ul>"+"<li>"+"您查询的地点为"+msg.basic.city+"</li>"+"<li>"+"天气"+msg.now.cond.txt+"</li>"+"<li>"+"温度"+msg.now.fl+"</li>"+"<li>"+"风向"+msg.now.wind.dir+"</li>")
+                            }
+                        }
+                    }
+                );
+            };
+        })
+        </script>
+        
+    </body>
+</html>
