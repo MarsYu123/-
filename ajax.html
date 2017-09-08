@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="script/jquery></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
         <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=UqaUsYhjQLYhftebMS3FdGoyPajTfzIq&s=1"></script>
         <style>
             #msg{
@@ -32,10 +33,10 @@
             var ctn;
             var cityname,
                 i=0;
-            var map = new BMap.Map("allmap");
+            var map = new BMap.Map("allmap");//创建地图实例
             map.centerAndZoom();
             var myCity = new BMap.LocalCity();
-            myCity.get(function (result) {
+            myCity.get(function (result) { //获取id位置
                 ctn = result.name;
                 select();
             });
@@ -67,6 +68,23 @@
                         success:function (data) {
                             var jsdata=eval(data);
                             var msg=jsdata.HeWeather5[0];
+                            //循环遍历json数据
+                            for(var o in msg){      //使用for in循环初始对象
+                                if(typeof msg[o]=="object"){    //判断对象类型，亦或者说判断是否还有嵌套
+                                    for(var i in msg[o]){    //从第一层内部嵌套开始循环
+                                        if(typeof msg[o][i]=="object"){  //判断第二层是否有嵌套
+                                             for(var j in msg[o][i]){   //循环第三层
+                                                 console.log("对象"+j+msg[o][i][j])
+                                             }
+                                        }else{ //如果没有第三层则输出第二层
+                                                  console.log("对象"+i+msg[o][i]);
+                                             }
+                                    }
+                                }else{     //如果没有嵌套直接输出
+                                    console.log("对象"+o+msg[o]);
+                                    }    
+                            }
+                            
                             switch (true) {
                                 case msg.status=="unknown city":
                                     $("#msg").html("没有此城市，请检查输入是否正确");
